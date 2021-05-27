@@ -1,3 +1,5 @@
+
+# Struct to hold all the Classifier's paramters 
 mutable struct Classifier 
     C::Vector{Char}
     A::Char
@@ -17,6 +19,7 @@ mutable struct Classifier
     end
 end
 
+# setter functions to update the parameters 
 function updateC(class::Classifier, C::Vector{Char})
     Classifier.C = C
 end
@@ -52,6 +55,3 @@ end
 function updaten(class::Classifier, n::Int)
     Classifier.n = n
 end
-
-Classifier(Vector{Char}("0100100"), '1', 0.0)
-
