@@ -3,9 +3,10 @@ include("Classifier.jl")
 # Struct to hold all the environment's information
 mutable struct Environment 
     cls
+    i::Int
 
     function Environment()
-        new([])
+        new([], 1)
     end
 
 end
@@ -13,6 +14,16 @@ end
 # Adds 64 classifiers to the cls list. Each classifier
 # has a different 6-bit binary number and the action 
 # associated with that number
+
+function getSituation(self::Environment)
+    env = self.cls[self.i]
+    if (self.i > length(self.cls))
+        self.i = 1
+    else 
+        self.i += 1
+    end 
+    return env
+end
 
 function initializeEnvironment(self::Environment)
     binaryNumbers(self, Vector{Char}("000000"), 1, 6)
