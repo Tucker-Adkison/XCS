@@ -11,7 +11,7 @@ struct XCS
     θdel::Int
     δ::Float64
     θsub::Int
-    Ph::Float64
+    Phash::Float64
     pI::Float64 # essentially 0
     εI::Float64 # essentially 0
     FI::Float64 # essentially 0
@@ -20,7 +20,7 @@ struct XCS
     doGASubsumption::Bool
     doActionSetSubsumption::Bool
 
-    function XCS(N, β, α, ε0, ν, γ, θGA, χ, μ, θdel, δ, θsub, Ph, pI, εI, FI, pexplr, θmna, doGASubsumption, doActionSetSubsumption)
-        new(N, β, α, ε0, ν, γ, θGA, χ, μ, θdel, δ, θsub, Ph, pI, εI, FI, pexplr, θmna, doGASubsumption, doActionSetSubsumption)
+    function XCS(N, β, α, ε0, ν, γ, θGA, χ, μ, θdel, δ, θsub, Phash, pI, εI, FI, pexplr, θmna, doGASubsumption, doActionSetSubsumption)
+        new(N, β, α, ε0, ν, γ, θGA, χ, μ, θdel, δ, θsub, Phash, pI, εI, FI, pexplr, θmna, doGASubsumption, doActionSetSubsumption)
     end
 end

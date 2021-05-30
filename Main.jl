@@ -43,7 +43,7 @@ end
 function doesMatch(cl, σ)
     for i = 1:length(cl.C)
         x = cl.C[i]
-        if (x != 'h' && x != σ.C[i])
+        if (x != '#' && x != σ.C[i])
             return false 
         end
     return true
@@ -53,8 +53,8 @@ end
 function generateCoveringClassifier(M, σ)
     cl = Classifier(Vector{Char}("000000"), '0', 0.0)
     for i = 1:length(cl.C)
-        if (rand() < xcs.Ph)
-            cl.C[i] = 'h'
+        if (rand() < xcs.Phash)
+            cl.C[i] = '#'
         else 
             cl.C[i] = σ.C[i]
         end
