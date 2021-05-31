@@ -2,8 +2,9 @@ include("Classifier.jl")
 
 # Struct to hold all the environment's information
 mutable struct Environment 
-    cl
+    clArr
     i::Int
+    cl
 Int, 
     function Environment()
         new([], 1)
@@ -16,25 +17,22 @@ end
 # associated with that number
 
 function getSituation(self::Environment)
-    env = self.cl[self.i]
-    if (self.i > length(self.cl))
+    self.cl = self.clArr[self.i]
+    if (self.i == length(self.clArr))
         self.i = 1
     else 
         self.i += 1
     end 
-    return env
+
+    return self.cl
 end
 
 function initializeEnvironment(self::Environment)
     binaryNumbers(self, Vector{Char}("000000"), 1, 6)
-    for i = 1:length(self.cl)
-        self.cl[i] = Classifier(self.cl[i], getAction(self, self.cl[i]) , 0.0)
+    for i = 1:length(self.clArr)
+        self.clArr[i] = Classifier(self.clArr[i], getAction(self, self.clArr[i]) , 0.0)
     end
 end 
-
-function executeAction(self::Environment, act)
-    return 
-end
 
 # helper function to determin the classifier's action
 function getAction(self::Environment, cl)
@@ -56,7 +54,7 @@ end
 # helper function to generate all 6-bit binary numbers
 function binaryNumbers(self::Environment, s, i, n)
     if i == n+1
-        push!(self.cl, deepcopy(s))
+        push!(self.clArr, deepcopy(s))
         return
     end
     s[i] = '0'
