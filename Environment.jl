@@ -4,7 +4,7 @@ include("Classifier.jl")
 mutable struct Environment 
     cl
     i::Int
-
+Int, 
     function Environment()
         new([], 1)
     end
@@ -30,24 +30,28 @@ function initializeEnvironment(self::Environment)
     for i = 1:length(self.cl)
         self.cl[i] = Classifier(self.cl[i], getAction(self, self.cl[i]) , 0.0)
     end
-
 end 
+
+function executeAction(self::Environment, act)
+    return 
+end
 
 # helper function to determin the classifier's action
 function getAction(self::Environment, cl)
     f = cl[1]
     s = cl[2]
 
-    if f == 0 && s == 0
-        return cl[3]
-    elseif f == 0 && s == 1
-        return cl[4]
-    elseif f == 1 && s == 0
-        return cl[5]
+    if f == '0' && s == '0'
+        return parse(Int, cl[3])
+    elseif f == '0' && s == '1'
+        return parse(Int, cl[4])
+    elseif f == '1' && s == '0'
+        return parse(Int, cl[5])
     else 
-        return cl[6]
+        return parse(Int, cl[6])
     end
 end
+
 
 # helper function to generate all 6-bit binary numbers
 function binaryNumbers(self::Environment, s, i, n)

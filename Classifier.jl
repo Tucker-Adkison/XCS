@@ -2,7 +2,7 @@
 # Struct to hold all the Classifier's paramters 
 mutable struct Classifier 
     C::Vector{Char}
-    A::Char
+    A::Int
     p::Float64
 
     # additional parameters 
@@ -14,7 +14,7 @@ mutable struct Classifier
     n::Int
 
     # constructor 
-    function Classifier(C::Vector{Char}, A::Char, p::Float64)
+    function Classifier(C::Vector{Char}, A::Int, p::Float64)
         new(C, A, p, 0.0, 0.0, 0, 0.0, 0.0, 0)
     end
 end
