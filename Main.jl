@@ -8,7 +8,9 @@ function runExperiment()
     while (true)
         σ = getSituation(env)
         M = generateMatchSet(P, σ)
-        println(M)
+        PA = generatePredictionArray(M)
+        act = selectAction(PA)
+        A = generateActionSet(M, act)
         if (true) #terminating criteria
             break
         end
@@ -51,7 +53,7 @@ function doesMatch(cl, σ)
 end
 
 function generateCoveringClassifier(M, σ)
-    cl = Classifier(Vector{Char}("000000"), '0', 0.0)
+    cl = Classifier(Vector{Char}("000000"), 0, 0.0)
     for i = 1:length(cl.C)
         if (rand() < xcs.Phash)
             cl.C[i] = '#'
@@ -66,7 +68,7 @@ function generateCoveringClassifier(M, σ)
     end
 
 
-    cl.A = '1' ∉ temp ? '1' : '0'
+    cl.A = 1 ∉ temp ? 1 : 0
     cl.p = xcs.pI
     cl.ε = xcs.εI
     cl.F = xcs.FI
@@ -117,8 +119,49 @@ function deletionVote(cl, avFtinessInPopulation)
     return vote
 end
 
+function generatePredictionArray(M)
+    PA = [0.0, 0.0]
+    FSA = [0.0, 0.0]
+    for i = 1:length(M)
+        cl = M[i]
+        if (PA[cl.A+1] == 0.0)
+            PA[cl.A+1] = cl.p * cl.F
+        else 
+            PA[cl.A+1] = PA[cl.A+1] + cl.p * cl.F
+        end
+        FSA[cl.A+1] = FSA[cl.A+1] + cl.F 
+    end
+
+    A = [0, 1]
+    for i = 1:2
+        if (FSA[A[i]+1] != 0.0)
+            PA[A[i]+1] = Float64(PA[A[i]+1] / FSA[A[i]+1])
+        end
+    end
+    return PA
+
+end
+
+function selectAction(PA)
+    if (rand() < xcs.pexplr)
+        return PA[rand(1:length(PA))]
+    else 
+        return PA[1] > PA[2] ? 0 : 1
+    end
+end
+
+function generateActionSet(M, act)
+    A = []
+    for i = 1:length(M)
+        if (M[i].A == act)
+            push(A, M[i])
+        end
+    end
+    return A
+end
+
 env = Environment()
 initializeEnvironment(env)
 #todo Initialize reinforcement program
-xcs = XCS(500, 0.15, 0.1, 10, 5, 0.71, 35, 0.7, 0.03, 20, 0.1, 20, 0.33, 1E-10, 1E-10, 1E-10, 0.5, 2, false, false)
+xcs = XCS(500, 0.15, 0.1, 10, 5, 0.71, 35, 0.7, 0.03, 20, 0.1, 20, 0.33, 1E-5, 1E-5, 1E-5, 0.5, 2, false, false)
 runExperiment()
