@@ -18,3 +18,5 @@ mutable struct Classifier
         new(C, A, p, 0.0, 0.0, 0, 0.0, 0.0, 0)
     end
 end
+
+# Base.:(==)(x::Classifier, y::Classifier) = x.C == y.C 

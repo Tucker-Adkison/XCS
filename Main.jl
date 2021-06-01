@@ -6,7 +6,7 @@ include("XCS.jl")
 function runExperiment()
     PSet = []
     ρ1 = 0
-    A1 = []
+    A1 = Set()
     t = 0
     while (true)
         σ = getSituation(env)
@@ -25,7 +25,7 @@ function runExperiment()
             P = ρ
             A = updateSet(A, P, PSet)
             PSet = runGa(A, σ, PSet, t)
-            A1 = []
+            A1 = Set()
         else 
             A1 = A
             ρ1 = ρ
@@ -39,7 +39,7 @@ function runExperiment()
 end
 
 function generateMatchSet(P, σ, t)
-    M = []
+    M = Set()
     while (isempty(M))
         for cl in P
             if doesMatch(cl, σ)
@@ -47,16 +47,16 @@ function generateMatchSet(P, σ, t)
             end
         end
         temp =  Set()
-        for j = 1:length(M)
-            if M[j].A ∉ temp
-                push!(temp, M[j].A)
+        for cl in M
+            if cl.A ∉ temp
+                push!(temp, cl.A)
             end
         end
         if (length(temp) < xcs.θmna)
             clc = generateCoveringClassifier(M, σ, t)
             push!(P, clc)
             P = deleteFromPopulation(P)
-            M = []
+            M = Set()
         end
     end
     return M
@@ -83,8 +83,8 @@ function generateCoveringClassifier(M, σ, t)
     end
 
     temp = Set()
-    for i = 1:length(M)
-        push!(temp, M[i].A)
+    for cl in M
+        push!(temp, cl.A)
     end
 
     cl.A = 1 ∉ temp ? 1 : 0
@@ -168,10 +168,10 @@ function selectAction(PA)
 end
 
 function generateActionSet(M, act)
-    A = []
-    for i = 1:length(M)
-        if (M[i].A == act)
-            push!(A, M[i])
+    A = Set()
+    for cl in M
+        if (cl.A == act)
+            push!(A, cl)
         end
     end
     return A
@@ -193,8 +193,8 @@ function updateSet(A, P, PSet)
         end
 
         cnSum = 0.0
-        for i = 1:length(A)
-            cnSum += A[i].n
+        for cl in A
+            cnSum += cl.n
         end
         if (cl.exp < 1/xcs.β)
             cl.as = cl.as + (cnSum - cl.as) / cl.exp
@@ -314,7 +314,7 @@ function applyCrossover(cl1, cl2)
             cl2.C[i] = temp 
         end
         i += 1
-        if (i < y)
+        if (i > y)
             break 
         end
     end
@@ -332,7 +332,7 @@ function applyMutation(cl, σ)
             end
         end
         i += 1 
-        if (i < length(cl.C))
+        if (i > length(cl.C))
             break 
         end
     end
@@ -346,9 +346,9 @@ end
 env = Environment()
 initializeEnvironment(env)
 rp = Reinforcement()
-xcs = XCS(500, 0.15, 0.1, 10, 5, 0.71, 35, 0.7, 0.03, 20, 0.1, 20, 0.33, 1E-5, 1E-5, 1E-5, 0.5, 2, false, false)
-iterations = 1000
-A = runExperiment()
-for i in A 
-    println(i.C, " ", i.A)
+iterations = 5000
+xcs = XCS(iterations, 0.15, 0.1, 10, 5, 0.71, 35, 0.7, 0.03, 20, 0.1, 20, 0.33, 1E-5, 1E-5, 1E-5, 0.5, 2, false, false)
+M = runExperiment()
+for i in M 
+    println(i)
 end
