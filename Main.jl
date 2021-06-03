@@ -7,33 +7,40 @@ function runExperiment()
     PSet = []
     ρ1 = 0
     A1 = Set()
+    σ1 = 0
     t = 0
+    mf = 0
     while (true)
         σ = getSituation(env)
         M = generateMatchSet(PSet, σ, t)
         PA = generatePredictionArray(M)
         act = selectAction(PA)
+        # println(act)
         A = generateActionSet(M, act)
         ρ = getReward(rp, env, act)
         if(!isempty(A1))
             P = ρ1 + xcs.γ * max(PA...)
-            A1 = updateSet(A1, P, PSet)
-            PSet = runGA(A1,  σ, PSet, t)
+            updateSet(A1, P, PSet)
+            runGA(A1,  σ1, PSet, t)
         end
 
         if (rp.eop)
             P = ρ
-            A = updateSet(A, P, PSet)
-            PSet = runGa(A, σ, PSet, t)
+            updateSet(A, P, PSet)
+            runGa(A, σ, PSet, t)
             A1 = Set()
         else 
             A1 = A
             ρ1 = ρ
             σ1 = σ
         end
-        if (t == iterations) #terminating criteria
-            return M
-        end
+
+        println(round(maximum(cl->cl.F, PSet), digits=2))
+
+        chads = filter(cl->cl.F == 0.9, PSet)
+        if (length(chads) >= 8) #terminating criteria
+            return chads, t
+        end 
         t += 1
     end
 end
@@ -46,20 +53,20 @@ function generateMatchSet(P, σ, t)
                 push!(M, cl)
             end
         end
+
         temp =  Set()
         for cl in M
-            if cl.A ∉ temp
-                push!(temp, cl.A)
-            end
+            push!(temp, cl.A)
         end
+        
         if (length(temp) < xcs.θmna)
             clc = generateCoveringClassifier(M, σ, t)
             push!(P, clc)
-            P = deleteFromPopulation(P)
+            deleteFromPopulation(P)
             M = Set()
         end
     end
-    return M
+    return M 
 end
 
 function doesMatch(cl, σ)
@@ -86,8 +93,12 @@ function generateCoveringClassifier(M, σ, t)
     for cl in M
         push!(temp, cl.A)
     end
-
-    cl.A = 1 ∉ temp ? 1 : 0
+    
+    if (isempty(temp))
+        cl.A = rand(0:1)
+    else 
+        cl.A = 1 ∉ temp ? 1 : 0
+    end
     cl.p = xcs.pI
     cl.ε = xcs.εI
     cl.F = xcs.FI
@@ -99,6 +110,16 @@ function generateCoveringClassifier(M, σ, t)
     return cl
 end
 
+function insertInPopulation(cl, P)
+    for c in P 
+        if (c.C == cl.C && c.A == cl.A)
+            c.n += 1 
+            return 
+        end
+    end
+    push!(P, cl)
+end
+
 function deleteFromPopulation(P)
     nSum = 0
     fSum = 0
@@ -107,7 +128,7 @@ function deleteFromPopulation(P)
         fSum += P[i].F
     end
     if nSum <= xcs.N
-        return P
+        return
     end
     avFtinessInPopulation = fSum/nSum 
     voteSum = 0 
@@ -123,10 +144,9 @@ function deleteFromPopulation(P)
             else 
                 filter!(e->e≠c, P)
             end
-            return P
+            return 
         end
     end
-    return P
 end
 
 function deletionVote(cl, avFtinessInPopulation)
@@ -150,18 +170,23 @@ function generatePredictionArray(M)
     end
 
     A = [0, 1]
-    for i = 1:2
-        if (FSA[A[i]+1] != 0.0)
-            PA[A[i]+1] = Float64(PA[A[i]+1] / FSA[A[i]+1])
+    for i in A
+        if (FSA[i+1] != 0.0)
+            PA[i+1] = Float64(PA[i+1] / FSA[i+1])
         end
     end
     return PA
-
 end
 
 function selectAction(PA)
     if (rand() < xcs.pexplr)
-        return PA[rand(1:length(PA))]
+        if PA[1] == 0.0
+            return 1 
+        elseif PA[2] == 0.0
+            return 0 
+        else 
+            return rand(0:1)
+        end
     else 
         return PA[1] > PA[2] ? 0 : 1
     end
@@ -202,11 +227,10 @@ function updateSet(A, P, PSet)
             cl.as = cl.as + xcs.β * (cnSum - cl.as)
         end
     end
-    A = updateFitness(A)
+    updateFitness(A)
     if (xcs.doActionSetSubsumption)
-        P = doActionSetSubsumption(A, PSet)
+        doActionSetSubsumption(A, PSet)
     end
-    return A
 end
 
 function updateFitness(A)
@@ -230,7 +254,6 @@ function updateFitness(A)
         cl.F = cl.F + xcs.β * (k[i] * cl.n / accuracySum - cl.F)
         i += 1
     end
-    return A
 end
 
 function runGA(A, σ, P, t)
@@ -253,7 +276,7 @@ function runGA(A, σ, P, t)
         child1.exp = 0
         child2.exp = 0 
         if (rand() < xcs.χ)
-            child1, child2 = applyCrossover(child1, child2)
+            applyCrossover(child1, child2)
             child1.p = (parent1.p + parent2.p) / 2 
             child1.ε = (parent1.ε + parent2.ε) / 2
             child1.F = (parent1.F + parent2.F) / 2
@@ -265,22 +288,21 @@ function runGA(A, σ, P, t)
         child2.F = child2.F * 0.1 
         childArr = [child1, child2]
         for child in childArr
-            child = applyMutation(child, σ)
+            applyMutation(child, σ)
             if (xcs.doGASubsumption)
                 if (doesSubsume(parent1, child))
                     parent1.n += 1
                 elseif (doesSubsume(parent2, child))
                     parent2.n += 1
                 else 
-                    push!(P, child)
+                    insertInPopulation(child, P)
                 end
             else 
-                push!(P, child)
+                insertInPopulation(child, P)
             end 
         end
-        P = deleteFromPopulation(P)
+        deleteFromPopulation(P)
     end
-    return P
 end
 
 function selectOffspring(A)
@@ -314,11 +336,10 @@ function applyCrossover(cl1, cl2)
             cl2.C[i] = temp 
         end
         i += 1
-        if (i > y)
+        if (i >= y)
             break 
         end
     end
-    return cl1, cl2
 end
 
 function applyMutation(cl, σ)
@@ -332,23 +353,106 @@ function applyMutation(cl, σ)
             end
         end
         i += 1 
-        if (i > length(cl.C))
+        if (i >= length(cl.C))
             break 
         end
     end
     if (rand() < xcs.μ)
         cl.A = rand(0:1)
     end
+end
 
-    return cl
+function doActionSetSubsumption(A, P)
+    cl = Classifier(Vector{Char}("000000"), 0, 0.0)
+    for c in A
+        if (couldSubsume(c))
+            clhash = 0 
+            chash = 0 
+            for i in c.C
+                if (i == '#')
+                    chash += 1 
+                end
+            end
+            for i in cl.C
+                if (i == '#')
+                    clhash += 1 
+                end
+            end
+
+            if (chash > clhash || chash == clhash && rand() < 0.5)
+                cl = c  
+                          
+            end
+        end
+    end 
+    for c in A
+        if (isMoreGeneral(cl, c))
+            cl.n = cl.n + c.n 
+            filter!(e->e≠c, P)
+            filter!(e->e≠c, A)    
+        end
+    end
+end 
+
+function couldSubsume(cl)
+    if (cl.exp > xcs.θsub)
+        if (cl.ε < xcs.ε0)
+            return true 
+        end
+    end
+    return false 
+end
+
+function isMoreGeneral(clgen, clspec)
+    clgenhash = 0
+    clspechash = 0
+    for i in clgen.C
+        if i == '#'
+            clgenhash += 1
+        end
+    end
+
+    for i in clspec.C
+        if i == '#' 
+            clspechash += 1 
+        end
+    end
+
+    if (clgenhash <= clspechash)
+        return false 
+    end
+    i = 0
+    while (true) 
+        if (clgen.C[i] != '#' && clgen.C[i] != clspec.C[i])
+            return false 
+        end
+        i += 1
+        if (i >= length(clgen.C))
+            break 
+        end
+    end
+    return true 
+end
+
+function doesSubsume(clsub, cltos)
+    if (clsub.A == cltos.A)
+        if (couldSubsume(clsub))
+            if (isMoreGeneral(clsub, cltos))
+                return true 
+            end
+        end
+    end
+    return false 
 end
 
 env = Environment()
 initializeEnvironment(env)
 rp = Reinforcement()
-iterations = 5000
+iterations = 100000
 xcs = XCS(iterations, 0.15, 0.1, 10, 5, 0.71, 35, 0.7, 0.03, 20, 0.1, 20, 0.33, 1E-5, 1E-5, 1E-5, 0.5, 2, false, false)
-M = runExperiment()
-for i in M 
+
+P, t = runExperiment()
+for i in P 
     println(i)
 end
+println("Iterations ", t)
