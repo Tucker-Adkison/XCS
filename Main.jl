@@ -35,11 +35,8 @@ function runExperiment()
             σ1 = σ
         end
 
-        println(round(maximum(cl->cl.F, PSet), digits=2))
-
-        chads = filter(cl->cl.F == 0.9, PSet)
-        if (length(chads) >= 8) #terminating criteria
-            return chads, t
+        if (t == iterations) #terminating criteria
+            return PSet
         end 
         t += 1
     end
@@ -421,7 +418,7 @@ function isMoreGeneral(clgen, clspec)
     if (clgenhash <= clspechash)
         return false 
     end
-    i = 0
+    i = 1
     while (true) 
         if (clgen.C[i] != '#' && clgen.C[i] != clspec.C[i])
             return false 
@@ -448,11 +445,21 @@ end
 env = Environment()
 initializeEnvironment(env)
 rp = Reinforcement()
-iterations = 100000
-xcs = XCS(iterations, 0.15, 0.1, 10, 5, 0.71, 35, 0.7, 0.03, 20, 0.1, 20, 0.33, 1E-5, 1E-5, 1E-5, 0.5, 2, false, false)
+iterations = 5000
 
-P, t = runExperiment()
-for i in P 
-    println(i)
+function evalFitness(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t)
+
+    # xcs = XCS(10000, 0.15, 0.1, iterations * .10, 5, 0.71, 35, 0.7, 0.03, 20, 0.1, 20, 0.33, 1E-5, 1E-5, 1E-5, 0.5, 2, false, false)
+    global xcs = XCS(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t)
+    # println(xcs)
+    P = runExperiment()
+    avg = 0.0
+    for p in P 
+        avg += p.F 
+    end
+
+    return avg/length(P)
 end
-println("Iterations ", t)
+
+# println(evalFitness(10000, 0.15, 0.1, iterations * .10, 5, 0.71, 35, 0.7, 0.03, 20, 0.1, 20, 0.33, 1E-5, 1E-5, 1E-5, 0.5, 2, false, false)
+# )

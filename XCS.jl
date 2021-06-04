@@ -1,4 +1,4 @@
-struct XCS
+mutable struct XCS
     N::Int
     β::Float64 # 0.1-0.2
     α::Float64
