@@ -1,0 +1,15 @@
+Multiplexer Problem:
+    Run 1 
+        XCS Iterations: 5000
+        GA Iterations: 1000
+        GA Population: 150 
+        Mutation Rate: 0.01
+        Result:
+        10000.0, 0.1, 0.802, 1000.0, 5.0, 0.615, 44.0, 0.5, 0.01, 20.0, 0.537, 20.0, 0.432, 0.0, 0.0, 0.0, 0.624, 2.0, 1.0, 1.0
+
+    Run 2 
+        XCS Iterations: 5000
+        GA Iterations: 5000
+        GA Population: 150 
+        Mutation Rate: 0.01
+        Result:

@@ -447,11 +447,10 @@ initializeEnvironment(env)
 rp = Reinforcement()
 iterations = 5000
 
+# helper function used in the generic algorithm for parameter updating
+# return the average fitness of all classifiers in the population
 function evalFitness(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t)
-
-    # xcs = XCS(10000, 0.15, 0.1, iterations * .10, 5, 0.71, 35, 0.7, 0.03, 20, 0.1, 20, 0.33, 1E-5, 1E-5, 1E-5, 0.5, 2, false, false)
     global xcs = XCS(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t)
-    # println(xcs)
     P = runExperiment()
     avg = 0.0
     for p in P 
@@ -461,5 +460,17 @@ function evalFitness(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t)
     return avg/length(P)
 end
 
-# println(evalFitness(10000, 0.15, 0.1, iterations * .10, 5, 0.71, 35, 0.7, 0.03, 20, 0.1, 20, 0.33, 1E-5, 1E-5, 1E-5, 0.5, 2, false, false)
-# )
+
+function main()
+    # xcs with default parameters from the paper 
+    # global xcs = XCS(10000, 0.15, 0.1, iterations * .10, 5, 0.71, 35, 0.7, 0.03, 20, 0.1, 20, 0.33, 1E-5, 1E-5, 1E-5, 0.5, 2, false, false)
+    
+    # xcs with paramaters from 1 Paramater Statictics.txt
+    global xcs = XCS(10000.0, 0.1, 0.802, 1000.0, 5.0, 0.615, 44.0, 0.5, 0.01, 20.0, 0.537, 20.0, 0.432, 0.0, 0.0, 0.0, 0.624, 2.0, 1.0, 1.0)
+    p = runExperiment()
+    for i in p
+        println(p)
+    end
+end
+
+# main()
