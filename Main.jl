@@ -465,12 +465,15 @@ function main()
     # xcs with default parameters from the paper 
     # global xcs = XCS(10000, 0.15, 0.1, iterations * .10, 5, 0.71, 35, 0.7, 0.03, 20, 0.1, 20, 0.33, 1E-5, 1E-5, 1E-5, 0.5, 2, false, false)
     
-    # xcs with paramaters from 1 Paramater Statictics.txt
-    global xcs = XCS(10000.0, 0.1, 0.802, 1000.0, 5.0, 0.615, 44.0, 0.5, 0.01, 20.0, 0.537, 20.0, 0.432, 0.0, 0.0, 0.0, 0.624, 2.0, 1.0, 1.0)
+    # xcs with parameters from 1 Parameter Statistics.txt
+    # global xcs = XCS(10000.0, 0.1, 0.802, 1000.0, 5.0, 0.615, 44.0, 0.5, 0.01, 20.0, 0.537, 20.0, 0.432, 1E-5, 1E-5, 1E-5, 0.624, 2.0, 1.0, 1.0)
+    
+    # xcs with parameters from 2 Parameter Statistics.txt
+    global xcs = XCS(10000.0, 0.1, 0.086, 1000.0, 5.0, 0.955, 38.0, 0.5, 0.01, 20.0, 0.671, 20.0, 0.976, 1E-5, 1E-5, 1E-5, 0.855, 2.0, 1.0, 1.0)
     p = runExperiment()
     for i in p
         println(p)
     end
 end
 
-# main()
+main()

@@ -67,4 +67,4 @@ function GA(iterations::Int)
 
 end
 
-GA(1000)
+GA(5000)
