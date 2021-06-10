@@ -50,7 +50,6 @@ function getAction(self::Environment, cl)
     end
 end
 
-
 # helper function to generate all 6-bit binary numbers
 function binaryNumbers(self::Environment, s, i, n)
     if i == n+1

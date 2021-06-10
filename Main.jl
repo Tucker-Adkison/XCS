@@ -15,7 +15,6 @@ function runExperiment()
         M = generateMatchSet(PSet, σ, t)
         PA = generatePredictionArray(M)
         act = selectAction(PA)
-        # println(act)
         A = generateActionSet(M, act)
         ρ = getReward(rp, env, act)
         if(!isempty(A1))
@@ -27,10 +26,10 @@ function runExperiment()
         if (rp.eop)
             P = ρ
             updateSet(A, P, PSet)
-            runGa(A, σ, PSet, t)
+            runGA(A, σ, PSet, t)
             A1 = Set()
         else 
-            A1 = A
+            A1 = deepcopy(A)
             ρ1 = ρ
             σ1 = σ
         end
@@ -55,7 +54,8 @@ function generateMatchSet(P, σ, t)
         for cl in M
             push!(temp, cl.A)
         end
-        
+
+
         if (length(temp) < xcs.θmna)
             clc = generateCoveringClassifier(M, σ, t)
             push!(P, clc)
@@ -469,11 +469,11 @@ function main()
     # global xcs = XCS(10000.0, 0.1, 0.802, 1000.0, 5.0, 0.615, 44.0, 0.5, 0.01, 20.0, 0.537, 20.0, 0.432, 1E-5, 1E-5, 1E-5, 0.624, 2.0, 1.0, 1.0)
     
     # xcs with parameters from 2 Parameter Statistics.txt
-    global xcs = XCS(10000.0, 0.1, 0.086, 1000.0, 5.0, 0.955, 38.0, 0.5, 0.01, 20.0, 0.671, 20.0, 0.976, 1E-5, 1E-5, 1E-5, 0.855, 2.0, 1.0, 1.0)
+    global xcs = XCS(1E9, 0.1, 0.086, 1000.0, 5.0, 0.955, 38.0, 0.5, 0.01, 20.0, 0.671, 20.0, 0.33, 1E-5, 1E-5, 1E-5, 0.855, 2.0, 1.0, 1.0)
     p = runExperiment()
     for i in p
-        println(p)
+        println(i)
     end
 end
 
-main()
+# main()

@@ -9,7 +9,7 @@ matingPool = []
 
 # initialize the population to a set of DNA with randomly generated XCS paramaters 
 for i = 1:totalPopulation 
-    push!(population, DNA([10000, rand(0.1:0.2), rand(), Int(10000*.10), 5, rand(), rand(25:50), rand(0.5:1.0), rand(0.01:0.05), 20, rand(), 20, rand(), 1E-5, 1E-5, 1E-5, rand(), 2, rand(0:1), rand(0:1)]))
+    push!(population, DNA([10000, rand(0.1:0.2), rand(), Int(10000*.10), 5, rand(), rand(25:50), rand(0.5:1.0), rand(0.01:0.05), 20, rand(), 20, 0.33, 1E-5, 1E-5, 1E-5, rand(), 2, rand(0:1), rand(0:1)]))
 end
 
 function GA(iterations::Int) 

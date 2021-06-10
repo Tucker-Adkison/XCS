@@ -2,10 +2,9 @@ mutable struct Reinforcement
     eop::Bool
 
     function Reinforcement()
-        new(false)
+        new(true)
     end
 end
-
 
 function getReward(self::Reinforcement, env, act)
     if env.cl.A == act
@@ -13,5 +12,4 @@ function getReward(self::Reinforcement, env, act)
     else 
         return 0 
     end
-    self.eop = true 
 end 

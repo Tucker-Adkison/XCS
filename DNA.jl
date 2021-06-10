@@ -31,8 +31,8 @@ function crossover(self::DNA, partner::DNA)
 end
 
 function mutate(self::DNA, mutationRate::Float64) 
-    mutationValues = [rand(0.1:0.2), rand(), rand(), rand(25:50), rand(0.5:1.0), rand(0.01:0.05), rand(), rand(), rand(), rand(0:1), rand(0:1)]
-    index = [2,3,6,7,8,9,11,13,17,19,20]
+    mutationValues = [rand(0.1:0.2), rand(), rand(), rand(25:50), rand(0.5:1.0), rand(0.01:0.05), rand(), rand(), rand(0:1), rand(0:1)]
+    index = [2,3,6,7,8,9,11,17,19,20]
 
     for i = 1:length(mutationValues)
         if rand() < mutationRate
