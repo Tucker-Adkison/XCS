@@ -445,7 +445,7 @@ end
 env = Environment()
 initializeEnvironment(env)
 rp = Reinforcement()
-iterations = 5000
+iterations = 100000
 
 # helper function used in the generic algorithm for parameter updating
 # return the average fitness of all classifiers in the population
@@ -469,11 +469,13 @@ function main()
     # global xcs = XCS(10000.0, 0.1, 0.802, 1000.0, 5.0, 0.615, 44.0, 0.5, 0.01, 20.0, 0.537, 20.0, 0.432, 1E-5, 1E-5, 1E-5, 0.624, 2.0, 1.0, 1.0)
     
     # xcs with parameters from 2 Parameter Statistics.txt
-    global xcs = XCS(1E9, 0.1, 0.086, 1000.0, 5.0, 0.955, 38.0, 0.5, 0.01, 20.0, 0.671, 20.0, 0.33, 1E-5, 1E-5, 1E-5, 0.855, 2.0, 1.0, 1.0)
+    # global xcs = XCS(1E9, 0.1, 0.086, 1000.0, 5.0, 0.955, 38.0, 0.5, 0.01, 20.0, 0.671, 20.0, 0.33, 1E-5, 1E-5, 1E-5, 0.855, 2.0, 1.0, 1.0)
+    
+    global xcs = XCS(10000.0, 0.1, 0.575, 1000.0, 5.0, 0.483, 33.0, 0.5, 0.01, 20.0, 0.739, 20.0, 0.33, 0.0, 0.0, 0.0, 0.572, 2.0, 1.0, 1.0)
     p = runExperiment()
     for i in p
         println(i)
     end
 end
 
-# main()
+main()
