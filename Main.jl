@@ -120,22 +120,23 @@ end
 function deleteFromPopulation(P)
     nSum = 0
     fSum = 0
-    for i = 1:length(P)
-        nSum += P[i].n 
-        fSum += P[i].F
+    for p in P
+        nSum += p.n
+        fSum += p.F
     end
     if nSum <= xcs.N
         return
     end
     avFtinessInPopulation = fSum/nSum 
     voteSum = 0 
-    for i = 1:length(P)
-        voteSum += deletionVote(P[i], avFtinessInPopulation)
+    for p in P
+        voteSum += deletionVote(p, avFtinessInPopulation)
     end
     choicePoint = rand() * voteSum
+    voteSum = 0
     for c in P
-        voteSum += deletionVote(c, avFtinessInPopulation)
-        if (voteSum < choicePoint)
+        voteSum = voteSum + deletionVote(c, avFtinessInPopulation)
+        if (voteSum > choicePoint)
             if (c.n > 1)
                 c.n -= 1
             else 
@@ -148,7 +149,7 @@ end
 
 function deletionVote(cl, avFtinessInPopulation)
     vote = cl.as * cl.n 
-    if (cl.exp > xcs.θdel && cl.F < xcs.δ * avFtinessInPopulation)
+    if (cl.exp > xcs.θdel && cl.F / cl.n < xcs.δ * avFtinessInPopulation)
         vote = vote * avFtinessInPopulation / (cl.F / cl.n)
     end
     return vote
@@ -232,24 +233,20 @@ end
 
 function updateFitness(A)
     accuracySum = 0 
-    k = []
-    for i = 1:length(A)
-        push!(k, 0.0)
+    k = Dict()
+    for cl in A
+        push!(k, cl.C => 0.0)
     end
-    i = 1
     for cl in A
         if (cl.ε < xcs.ε0)
-            k[i] = 1
+            k[cl.C] = 1
         else 
-            k[i] = xcs.α * (cl.ε / xcs.ε0) ^ (-xcs.ν)
+            k[cl.C] = xcs.α * (cl.ε / xcs.ε0) ^ (-xcs.ν)
         end
-        accuracySum = accuracySum + k[i] * cl.n 
-        i += 1
+        accuracySum = accuracySum + k[cl.C] * cl.n 
     end
-    i = 1
     for cl in A
-        cl.F = cl.F + xcs.β * (k[i] * cl.n / accuracySum - cl.F)
-        i += 1
+        cl.F = cl.F + xcs.β * (k[cl.C] * cl.n / accuracySum - cl.F)
     end
 end
 
@@ -260,7 +257,7 @@ function runGA(A, σ, P, t)
         tsnSum += cl.ts * cl.n
         nSum += cl.n 
     end
-    if (t - tsnSum / nSum > xcs.θGA)
+    if (t - (tsnSum / nSum) > xcs.θGA)
         for cl in A 
             cl.ts = t 
         end
@@ -273,7 +270,7 @@ function runGA(A, σ, P, t)
         child1.exp = 0
         child2.exp = 0 
         if (rand() < xcs.χ)
-            applyCrossover(child1, child2)
+            child1, child2 = applyCrossover(child1, child2)
             child1.p = (parent1.p + parent2.p) / 2 
             child1.ε = (parent1.ε + parent2.ε) / 2
             child1.F = (parent1.F + parent2.F) / 2
@@ -285,7 +282,7 @@ function runGA(A, σ, P, t)
         child2.F = child2.F * 0.1 
         childArr = [child1, child2]
         for child in childArr
-            applyMutation(child, σ)
+            child = applyMutation(child, σ)
             if (xcs.doGASubsumption)
                 if (doesSubsume(parent1, child))
                     parent1.n += 1
@@ -337,6 +334,7 @@ function applyCrossover(cl1, cl2)
             break 
         end
     end
+    return cl1, cl2
 end
 
 function applyMutation(cl, σ)
@@ -357,36 +355,39 @@ function applyMutation(cl, σ)
     if (rand() < xcs.μ)
         cl.A = rand(0:1)
     end
+    return cl
 end
 
 function doActionSetSubsumption(A, P)
-    cl = Classifier(Vector{Char}("000000"), 0, 0.0)
+    cl = Classifier(Vector{Char}(""), 0, 0.0)
     for c in A
         if (couldSubsume(c))
             clhash = 0 
             chash = 0 
-            for i in c.C
-                if (i == '#')
-                    chash += 1 
+            if (length(cl.C) > 1)
+                for i in c.C
+                    if (i == '#')
+                        chash += 1 
+                    end
+                end
+                for i in cl.C
+                    if (i == '#')
+                        clhash += 1 
+                    end
                 end
             end
-            for i in cl.C
-                if (i == '#')
-                    clhash += 1 
-                end
-            end
-
-            if (chash > clhash || chash == clhash && rand() < 0.5)
+            if (length(cl.C) == 0 || chash > clhash || chash == clhash && rand() < 0.5)
                 cl = c  
-                          
             end
         end
     end 
-    for c in A
-        if (isMoreGeneral(cl, c))
-            cl.n = cl.n + c.n 
-            filter!(e->e≠c, P)
-            filter!(e->e≠c, A)    
+    if (length(cl.C) != 0)
+        for c in A
+            if (isMoreGeneral(cl, c))
+                cl.n = cl.n + c.n 
+                filter!(e->e≠c, P)
+                filter!(e->e≠c, A)    
+            end
         end
     end
 end 
@@ -445,7 +446,7 @@ end
 env = Environment()
 initializeEnvironment(env)
 rp = Reinforcement()
-iterations = 100000
+iterations = 10000
 
 # helper function used in the generic algorithm for parameter updating
 # return the average fitness of all classifiers in the population
@@ -471,11 +472,9 @@ function main()
     # xcs with parameters from 2 Parameter Statistics.txt
     # global xcs = XCS(1E9, 0.1, 0.086, 1000.0, 5.0, 0.955, 38.0, 0.5, 0.01, 20.0, 0.671, 20.0, 0.33, 1E-5, 1E-5, 1E-5, 0.855, 2.0, 1.0, 1.0)
     
-    global xcs = XCS(10000.0, 0.1, 0.575, 1000.0, 5.0, 0.483, 33.0, 0.5, 0.01, 20.0, 0.739, 20.0, 0.33, 0.0, 0.0, 0.0, 0.572, 2.0, 1.0, 1.0)
+    global xcs = XCS(10000.0, 0.1, 0.575, 1000.0, 5.0, 0.483, 33.0, 0.5, 0.01, 20.0, 0.739, 20.0, 0.33, 1E-5, 1E-5, 1E-5, 0.572, 2.0, 1.0, 1.0)
     p = runExperiment()
-    for i in p
-        println(i)
-    end
+    print(p)
 end
 
 main()

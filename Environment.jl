@@ -3,11 +3,9 @@ include("Classifier.jl")
 # Struct to hold all the environment's information
 mutable struct Environment 
     clArr
-    i::Int
     cl
-Int, 
     function Environment()
-        new([], 1)
+        new([])
     end
 
 end
@@ -17,13 +15,7 @@ end
 # associated with that number
 
 function getSituation(self::Environment)
-    self.cl = self.clArr[self.i]
-    if (self.i == length(self.clArr))
-        self.i = 1
-    else 
-        self.i += 1
-    end 
-
+    self.cl = self.clArr[rand(1:length(self.clArr))]
     return self.cl
 end
 
