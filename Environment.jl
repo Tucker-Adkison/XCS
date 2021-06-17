@@ -1,13 +1,16 @@
 include("Classifier.jl")
+using Random: shuffle
 
 # Struct to hold all the environment's information
 mutable struct Environment 
-    clArr
+    dataset
+    test 
+    train
+    count
     cl
     function Environment()
-        new([])
+        new([], [], [], 1)
     end
-
 end
 
 # Adds 64 classifiers to the cl list. Each classifier
@@ -15,15 +18,24 @@ end
 # associated with that number
 
 function getSituation(self::Environment)
-    self.cl = self.clArr[rand(1:length(self.clArr))]
+    if (self.count == length(self.train))
+        self.count = 1
+    end
+    self.cl = self.train[self.count]
+    self.count += 1
     return self.cl
 end
 
 function initializeEnvironment(self::Environment)
     binaryNumbers(self, Vector{Char}("000000"), 1, 6)
-    for i = 1:length(self.clArr)
-        self.clArr[i] = Classifier(self.clArr[i], getAction(self, self.clArr[i]) , 0.0)
+    self.dataset = shuffle(self.dataset)
+    for i = 1:length(self.dataset)
+        self.dataset[i] = Classifier(self.dataset[i], getAction(self, self.dataset[i]) , 0.0)
     end
+
+    size = Int(floor(0.8 * length(self.dataset)))
+    self.train = self.dataset[1:size]
+    self.test = self.dataset[size+1:end]
 end 
 
 # helper function to determin the classifier's action
@@ -45,7 +57,7 @@ end
 # helper function to generate all 6-bit binary numbers
 function binaryNumbers(self::Environment, s, i, n)
     if i == n+1
-        push!(self.clArr, deepcopy(s))
+        push!(self.dataset, deepcopy(s))
         return
     end
     s[i] = '0'

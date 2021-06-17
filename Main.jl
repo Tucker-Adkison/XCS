@@ -14,7 +14,7 @@ function runExperiment()
         σ = getSituation(env)
         M = generateMatchSet(PSet, σ, t)
         PA = generatePredictionArray(M)
-        act = selectAction(PA)
+        act = selectAction(PA)  
         A = generateActionSet(M, act)
         ρ = getReward(rp, env, act)
         if(!isempty(A1))
@@ -37,6 +37,7 @@ function runExperiment()
         if (t == iterations) #terminating criteria
             return PSet
         end 
+
         t += 1
     end
 end
@@ -54,7 +55,6 @@ function generateMatchSet(P, σ, t)
         for cl in M
             push!(temp, cl.A)
         end
-
 
         if (length(temp) < xcs.θmna)
             clc = generateCoveringClassifier(M, σ, t)
@@ -235,18 +235,15 @@ function updateFitness(A)
     accuracySum = 0 
     k = Dict()
     for cl in A
-        push!(k, cl.C => 0.0)
-    end
-    for cl in A
         if (cl.ε < xcs.ε0)
-            k[cl.C] = 1
+            k[cl] = 1
         else 
-            k[cl.C] = xcs.α * (cl.ε / xcs.ε0) ^ (-xcs.ν)
+            k[cl] = xcs.α * (cl.ε / xcs.ε0) ^ (-xcs.ν)
         end
-        accuracySum = accuracySum + k[cl.C] * cl.n 
+        accuracySum = accuracySum + k[cl] * cl.n 
     end
     for cl in A
-        cl.F = cl.F + xcs.β * (k[cl.C] * cl.n / accuracySum - cl.F)
+        cl.F = cl.F + xcs.β * (k[cl] * cl.n / accuracySum - cl.F)
     end
 end
 
@@ -376,14 +373,14 @@ function doActionSetSubsumption(A, P)
                     end
                 end
             end
-            if (length(cl.C) == 0 || chash > clhash || chash == clhash && rand() < 0.5)
+            if (length(cl.C) == 0 || chash > clhash || (chash == clhash && rand() < 0.5))
                 cl = c  
             end
         end
     end 
     if (length(cl.C) != 0)
         for c in A
-            if (isMoreGeneral(cl, c))
+            if (isMoreGeneral(c, cl))
                 cl.n = cl.n + c.n 
                 filter!(e->e≠c, P)
                 filter!(e->e≠c, A)    
@@ -435,7 +432,7 @@ end
 function doesSubsume(clsub, cltos)
     if (clsub.A == cltos.A)
         if (couldSubsume(clsub))
-            if (isMoreGeneral(clsub, cltos))
+            if (isMoreGeneral(cltos, clsub))
                 return true 
             end
         end
@@ -472,9 +469,13 @@ function main()
     # xcs with parameters from 2 Parameter Statistics.txt
     # global xcs = XCS(1E9, 0.1, 0.086, 1000.0, 5.0, 0.955, 38.0, 0.5, 0.01, 20.0, 0.671, 20.0, 0.33, 1E-5, 1E-5, 1E-5, 0.855, 2.0, 1.0, 1.0)
     
-    global xcs = XCS(10000.0, 0.1, 0.575, 1000.0, 5.0, 0.483, 33.0, 0.5, 0.01, 20.0, 0.739, 20.0, 0.33, 1E-5, 1E-5, 1E-5, 0.572, 2.0, 1.0, 1.0)
+    global xcs = XCS(10000, 0.1, 0.575, 1000.0, 5.0, 0.483, 33.0, 0.5, 0.01, 20.0, 0.739, 20.0, 0.33, 1E-5, 1E-5, 1E-5, 0.572, 2.0, 1.0, 1.0)
     p = runExperiment()
-    print(p)
+    for i in p
+        if (i.F > 0.4)
+            println(i.C, " ", i.F)
+        end
+    end
 end
 
 main()
