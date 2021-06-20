@@ -9,7 +9,7 @@ mutable struct Classifier
     ε::Float64
     F::Float64
     exp::Int
-    ts::Float64
+    ts::Int
     as::Float64
     n::Int
 

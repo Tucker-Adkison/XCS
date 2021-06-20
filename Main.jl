@@ -34,8 +34,8 @@ function runExperiment()
             σ1 = σ
         end
 
-        if (t == iterations) #terminating criteria
-            return PSet
+        if (t == iterations)
+            return PSet 
         end 
 
         t += 1
@@ -77,12 +77,12 @@ function doesMatch(cl, σ)
 end
 
 function generateCoveringClassifier(M, σ, t)
-    cl = Classifier(Vector{Char}("000000"), 0, 0.0)
-    for i = 1:length(cl.C)
+    cl = Classifier(Vector{Char}(), 0, 0.0)
+    for char in σ.C
         if (rand() < xcs.Phash)
-            cl.C[i] = '#'
+            push!(cl.C, '#')
         else 
-            cl.C[i] = σ.C[i]
+            push!(cl.C, char) 
         end
     end
 
@@ -426,6 +426,7 @@ function isMoreGeneral(clgen, clspec)
             break 
         end
     end
+    
     return true 
 end
 
@@ -436,12 +437,13 @@ function doesSubsume(clsub, cltos)
                 return true 
             end
         end
-    end
+    end  
     return false 
 end
 
 env = Environment()
-initializeEnvironment(env)
+initializeMuxEnvironment(env)
+# initializeNANDEnvironment(env)
 rp = Reinforcement()
 iterations = 10000
 
@@ -461,10 +463,10 @@ end
 
 function main()
     # xcs with default parameters from the paper 
-    # global xcs = XCS(10000, 0.15, 0.1, iterations * .10, 5, 0.71, 35, 0.7, 0.03, 20, 0.1, 20, 0.33, 1E-5, 1E-5, 1E-5, 0.5, 2, false, false)
+    # global xcs = XCS(10000, 0.15, 0.1, iterations * .10, 5, 0.71, 35, 0.7, 0.03, 20, 0.1, 20, 0.33, 1E-5, 1E-5, 1E-5, 0.5, 2, true, true)
     
     # xcs with parameters from 1 Parameter Statistics.txt
-    # global xcs = XCS(10000.0, 0.1, 0.802, 1000.0, 5.0, 0.615, 44.0, 0.5, 0.01, 20.0, 0.537, 20.0, 0.432, 1E-5, 1E-5, 1E-5, 0.624, 2.0, 1.0, 1.0)
+    global xcs = XCS(10000.0, 0.1, 0.802, 1000.0, 5.0, 0.615, 44.0, 0.5, 0.01, 20.0, 0.537, 20.0, 0.432, 1E-5, 1E-5, 1E-5, 0.624, 2.0, 1.0, 1.0)
     
     # xcs with parameters from 2 Parameter Statistics.txt
     # global xcs = XCS(1E9, 0.1, 0.086, 1000.0, 5.0, 0.955, 38.0, 0.5, 0.01, 20.0, 0.671, 20.0, 0.33, 1E-5, 1E-5, 1E-5, 0.855, 2.0, 1.0, 1.0)
@@ -472,9 +474,14 @@ function main()
     global xcs = XCS(10000, 0.1, 0.575, 1000.0, 5.0, 0.483, 33.0, 0.5, 0.01, 20.0, 0.739, 20.0, 0.33, 1E-5, 1E-5, 1E-5, 0.572, 2.0, 1.0, 1.0)
     p = runExperiment()
     for i in p
-        if (i.F > 0.4)
-            println(i.C, " ", i.F)
-        end
+        println(i.C, " -> ", i.A)
+        println("\tTime Stamp: ", i.ts)
+        println("\tAverage Reward: ", i.p)
+        println("\tError: ", i.ε)
+        println("\tFitness: ", i.F)
+        println("\tExperience: ", i.exp)
+        println("\tAction Size Set: ", i.as)
+        println("\tNumerosity: ", i.n)
     end
 end
 

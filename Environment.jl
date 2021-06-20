@@ -4,57 +4,59 @@ using Random: shuffle
 # Struct to hold all the environment's information
 mutable struct Environment 
     dataset
-    test 
-    train
+    classifiers 
     count
     cl
     function Environment()
-        new([], [], [], 1)
+        new([], [], 1)
     end
 end
 
-# Adds 64 classifiers to the cl list. Each classifier
-# has a different 6-bit binary number and the action 
-# associated with that number
-
+# returns an instance from the list of classifiers
 function getSituation(self::Environment)
-    if (self.count == length(self.train))
+    if (self.count == length(self.classifiers))
         self.count = 1
     end
-    self.cl = self.train[self.count]
+    self.cl = self.classifiers[self.count]
     self.count += 1
     return self.cl
 end
 
-function initializeEnvironment(self::Environment)
+# initialize the mutliplexer environment
+function initializeMuxEnvironment(self::Environment)
+    # generate a list of all 6-bit binary numbers 
     binaryNumbers(self, Vector{Char}("000000"), 1, 6)
     self.dataset = shuffle(self.dataset)
-    for i = 1:length(self.dataset)
-        self.dataset[i] = Classifier(self.dataset[i], getAction(self, self.dataset[i]) , 0.0)
-    end
 
-    size = Int(floor(0.8 * length(self.dataset)))
-    self.train = self.dataset[1:size]
-    self.test = self.dataset[size+1:end]
+    # generate a list of classifiers from each instance in the dataset 
+    for bin in self.dataset
+        if bin[1] == '0' && bin[2] == '0' 
+            push!(self.classifiers, Classifier(bin, parse(Int, bin[3]), 0.0))
+        elseif bin[1] == '0' && bin[2] == '1'
+            push!(self.classifiers, Classifier(bin, parse(Int, bin[4]), 0.0))
+        elseif bin[1] == '1' && bin[2] == '0'
+            push!(self.classifiers, Classifier(bin, parse(Int, bin[5]), 0.0))
+        else 
+            push!(self.classifiers, Classifier(bin, parse(Int, bin[6]), 0.0))
+        end
+    end
 end 
 
-# helper function to determin the classifier's action
-function getAction(self::Environment, cl)
-    f = cl[1]
-    s = cl[2]
-
-    if f == '0' && s == '0'
-        return parse(Int, cl[3])
-    elseif f == '0' && s == '1'
-        return parse(Int, cl[4])
-    elseif f == '1' && s == '0'
-        return parse(Int, cl[5])
-    else 
-        return parse(Int, cl[6])
+# initialize the boolean NAND problem environment
+function initializeNANDEnvironment(self::Environment)
+    binaryNumbers(self, Vector{Char}("00"), 1, 2)
+    
+    # generate a list of classifiers from each instance in the dataset 
+    for bin in self.dataset
+        if (bin != "11")
+            push!(self.classifiers, Classifier(bin, 1, 0.0))
+        else 
+            push!(self.classifiers, Classifier(bin, 0, 0.0))
+        end
     end
 end
 
-# helper function to generate all 6-bit binary numbers
+# helper function to generate any k-bit binary number
 function binaryNumbers(self::Environment, s, i, n)
     if i == n+1
         push!(self.dataset, deepcopy(s))
