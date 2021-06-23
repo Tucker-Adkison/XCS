@@ -132,15 +132,15 @@ function generateCoveringClassifier(self, matchSet, situation)
         end
     end
 
-    actions = Set()
+    matchActions = Set()
     for cl in matchSet
-        push!(actions, cl.A)
+        push!(matchActions, cl.A)
     end
     
-    if (isempty(actions))
-        cl.A = rand(0:1)
+    if (isempty(matchActions))
+        cl.A = rand(self.env.actions)
     else 
-        cl.A = 1 ∉ actions ? 1 : 0
+        cl.A = rand(setdiff(self.env.actions, matchActions))
     end
     cl.p = self.xcs.pI
     cl.ε = self.xcs.εI
@@ -202,21 +202,26 @@ function deletionVote(self, cl, avFtinessInPopulation)
 end
 
 function generatePredictionArray(self, M)
-    predictionArr = [0.0, 0.0]
-    fitnessSumArr = [0.0, 0.0]
-    for cl in M
-        if (predictionArr[cl.A+1] == 0.0)
-            predictionArr[cl.A+1] = cl.p * cl.F
-        else 
-            predictionArr[cl.A+1] += cl.p * cl.F
-        end
-        fitnessSumArr[cl.A+1] += cl.F 
+    predictionArr = Dict()
+    fitnessSumArr = Dict()
+
+    for action in self.env.actions
+        predictionArr[action] = 0.0
+        fitnessSumArr[action] = 0.0
     end
 
-    actions = [0, 1]
-    for i in actions
-        if (fitnessSumArr[i+1] != 0.0)
-            predictionArr[i+1] = Float64(predictionArr[i+1] / fitnessSumArr[i+1])
+    for cl in M
+        if (predictionArr[cl.A] == 0.0)
+            predictionArr[cl.A] = cl.p * cl.F
+        else 
+            predictionArr[cl.A] += cl.p * cl.F
+        end
+        fitnessSumArr[cl.A] += cl.F 
+    end
+
+    for action in self.env.actions
+        if (fitnessSumArr[action] != 0.0)
+            predictionArr[action] = Float64(predictionArr[action] / fitnessSumArr[action])
         end
     end
     return predictionArr
@@ -224,15 +229,21 @@ end
 
 function selectAction(self, predictionArr)
     if (rand() < self.xcs.pexplr)
-        if predictionArr[1] == 0.0
-            return 1 
-        elseif predictionArr[2] == 0.0
-            return 0 
-        else 
-            return rand(0:1)
+        filter(e -> e != 0.0, predictionArr)
+        if (length(predictionArr) == 0)
+            return rand(self.env.actions)
         end
+        return rand(keys(predictionArr))
     else 
-        return predictionArr[1] > predictionArr[2] ? 0 : 1
+        bestVal = -1
+        bestAction = -1
+        for action in self.env.actions
+            if (predictionArr[action] > bestVal)
+                bestVal = predictionArr[action]
+                bestAction = action 
+            end
+        end
+        return bestAction
     end
 end
 
@@ -284,9 +295,9 @@ function updateFitness(self, actionSet)
         if (cl.ε < self.xcs.ε0)
             accuracy[cl] = 1
         else 
-            accuracy[cl] = self.xcs.α * (cl.ε / self.xcs.ε0) ^ (-self.xcs.ν)
+            accuracy[cl] = self.xcs.α * ((cl.ε / self.xcs.ε0) ^ (-self.xcs.ν))
         end
-        accuracySum = accuracySum + accuracy[cl] * cl.n 
+        accuracySum += accuracy[cl] * cl.n 
     end
     for cl in actionSet
         cl.F = cl.F + self.xcs.β * (accuracy[cl] * cl.n / accuracySum - cl.F)
@@ -396,7 +407,7 @@ function applyMutation(self, cl, situation)
         end
     end
     if (rand() < self.xcs.μ)
-        cl.A = rand(0:1)
+        cl.A = rand(self.env.actions)
     end
     return cl
 end

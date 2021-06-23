@@ -5,17 +5,19 @@ using Random: shuffle
 mutable struct Environment 
     dataset
     classifiers 
+    actions 
     count
     initialized
     cl
     function Environment()
-        new([], [], 1, false)
+        new([], [], Set(), 1, false)
     end
 end
 
 # returns an instance from the list of classifiers
 function getSituation(self::Environment)
     if (self.count == length(self.classifiers))
+        self.classifiers = shuffle(self.classifiers)
         self.count = 1
     end
     self.cl = self.classifiers[self.count]
@@ -41,7 +43,9 @@ function initializeMUXEnvironment(self::Environment)
             push!(self.classifiers, Classifier(bin, parse(Int, bin[6]), 0.0))
         end
     end
+    self.actions = Set([0, 1])
     self.initialized = true
+    
 end 
 
 # initialize the boolean NAND problem environment
@@ -56,6 +60,7 @@ function initializeNANDEnvironment(self::Environment)
             push!(self.classifiers, Classifier(bin, 0, 0.0))
         end
     end
+    self.actions = Set([0, 1])
     self.initialized = true
 end
 
