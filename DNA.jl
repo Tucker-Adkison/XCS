@@ -1,4 +1,4 @@
-include("Main.jl")
+include("Model.jl")
 
 mutable struct DNA
     genes::Vector{Float64}
@@ -8,9 +8,17 @@ mutable struct DNA
         new(genes)
     end
 end
-    
-function fitness(self::DNA) 
-    self.fitness = evalFitness(self.genes[1], self.genes[2], self.genes[3], self.genes[4], self.genes[5], self.genes[6], self.genes[7], self.genes[8], self.genes[9],self.genes[10], self.genes[11], self.genes[12], self.genes[13], self.genes[14], self.genes[15], self.genes[16], self.genes[17],self. genes[18], self.genes[19], self.genes[20])
+
+function fitness(self::DNA, iterations) 
+    model = Model(iterations)
+    model.xcs = XCS(self.genes[1], self.genes[2], self.genes[3], self.genes[4], self.genes[5], self.genes[6], self.genes[7], self.genes[8], self.genes[9],self.genes[10], self.genes[11], self.genes[12], self.genes[13], self.genes[14], self.genes[15], self.genes[16], self.genes[17],self. genes[18], self.genes[19], self.genes[20])
+    population = run(model)
+    avg = 0.0
+    for p in population
+        avg += p.F 
+    end
+
+    self.fitness = avg/length(P)
 end
 
 

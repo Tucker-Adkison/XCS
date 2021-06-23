@@ -12,14 +12,14 @@ for i = 1:totalPopulation
     push!(population, DNA([10000, rand(0.1:0.2), rand(), Int(10000*.10), 5, rand(), rand(25:50), rand(0.5:1.0), rand(0.01:0.05), 20, rand(), 20, 0.33, 1E-5, 1E-5, 1E-5, rand(), 2, rand(0:1), rand(0:1)]))
 end
 
-function GA(iterations::Int) 
+function geneticAlgorithm(iterations::Int) 
     iterations = UInt(iterations)
     t = 0
 
     while (true)
         # generate fitness for all classifiers in the population
         for i = 1:length(population)
-            fitness(population[i])
+            fitness(population[i], iterations)
         end
 
         # make a mating pool from the population using roulette selection 
@@ -61,10 +61,6 @@ function GA(iterations::Int)
 
         # debugging to help make sure the algorithm is working 
         println("Generation: ", t)
-
         t += 1
     end
-
 end
-
-GA(5000)

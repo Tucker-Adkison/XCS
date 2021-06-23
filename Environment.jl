@@ -23,7 +23,7 @@ function getSituation(self::Environment)
 end
 
 # initialize the mutliplexer environment
-function initializeMuxEnvironment(self::Environment)
+function initializeMUXEnvironment(self::Environment)
     # generate a list of all 6-bit binary numbers 
     binaryNumbers(self, Vector{Char}("000000"), 1, 6)
     self.dataset = shuffle(self.dataset)
