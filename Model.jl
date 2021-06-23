@@ -13,7 +13,6 @@ mutable struct Model
 
     function Model(iterations::Int)
         env = Environment()
-        initializeMUXEnvironment(env)
         rp = Reinforcement()
         xcs = XCS(10000, 0.1, 0.575, 1000.0, 5.0, 0.483, 33.0, 0.5, 0.01, 20.0, 0.739, 20.0, 0.33, 1E-5, 1E-5, 1E-5, 0.572, 2.0, 1.0, 1.0)
         new(env, rp, iterations, 0, [], xcs)
@@ -49,6 +48,11 @@ function Base.iterate(self::Model, state=1)
 end
 
 function run(self::Model)
+    if (self.env.initialized == false)
+        println("Environment not initialized")
+        return 
+    end
+
     population = []
     prevReward = 0
     prevActionSet = Set()

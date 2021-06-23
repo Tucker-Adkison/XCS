@@ -6,9 +6,10 @@ mutable struct Environment
     dataset
     classifiers 
     count
+    initialized
     cl
     function Environment()
-        new([], [], 1)
+        new([], [], 1, false)
     end
 end
 
@@ -40,6 +41,7 @@ function initializeMUXEnvironment(self::Environment)
             push!(self.classifiers, Classifier(bin, parse(Int, bin[6]), 0.0))
         end
     end
+    self.initialized = true
 end 
 
 # initialize the boolean NAND problem environment
@@ -54,6 +56,7 @@ function initializeNANDEnvironment(self::Environment)
             push!(self.classifiers, Classifier(bin, 0, 0.0))
         end
     end
+    self.initialized = true
 end
 
 # helper function to generate any k-bit binary number
